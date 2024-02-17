@@ -1,11 +1,13 @@
 import tkinter as tk
 from tkinter import ttk
+from PIL import ImageTk, Image
 import paho.mqtt.client as mqtt
 
 class MQTTTestApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("MQTT Test Panel")
+        self.root.title("Systéme de détection d'intrusion")
+        self.root.geometry("400x300")
 
         # Configuration MQTT
         self.broker_address = "broker.hivemq.com"
@@ -18,8 +20,12 @@ class MQTTTestApp:
         self.connect_to_mqtt()
 
     def create_gui(self):
+        # Charger l'image pour l'arrière-plan
+        self.bg_image = Image.open("bg1.jpg")
+        self.bg_photo = ImageTk.PhotoImage(self.bg_image)
+        
         # Label pour afficher les données
-        self.motion_label = ttk.Label(self.root, text="Motion: ")
+        self.motion_label = ttk.Label(self.root, text="Mouvement: ")
         self.motion_label.pack(pady=10)
 
         self.light_label = ttk.Label(self.root, text="Luminosité: ")
