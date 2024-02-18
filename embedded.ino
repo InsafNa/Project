@@ -1,5 +1,16 @@
 #include <WiFi.h>
 #include <PubSubClient.h>
+#include "DHT.h" 
+
+#define PIR_PIN 13 
+#define Relay_PIN 4
+#define LDR_PIN 34
+#define buzzer 18
+#define DHTPIN 15
+#define DHTTYPE DHT22 
+#define TEMP_UPPER_THRESHOLD  25 // upper temperature threshold
+#define TEMP_LOWER_THRESHOLD  22 // lower temperature threshold
+
 
 const char* ssid = "Wokwi-GUEST";
 const char* password = "";
@@ -11,21 +22,6 @@ char clientId[50];
 
 WiFiClient espClient;
 PubSubClient client(espClient);
-
-#define PIR_PIN 13 
-#define Relay_PIN 4
-#define LDR_PIN 34
-#define buzzer 18
-#include "DHT.h"
-
-#define DHTPIN 15 
-#define DHTTYPE DHT22 
-
-#define TEMP_UPPER_THRESHOLD  25 // upper temperature threshold
-#define TEMP_LOWER_THRESHOLD  22 // lower temperature threshold
-
-
-
 DHT dht(DHTPIN, DHTTYPE);
 
 void setup() {
@@ -102,12 +98,14 @@ void callback(char* topic, byte* message, unsigned int length) {
     if(stMessage == "on"){
       Serial.println("on");
       digitalWrite(Relay_PIN, HIGH);
-      client.publish("STATRELAY", "LED is ON");
+      tone(buzzer,600);
+      client.publish("STATRELAY", "Intrusion System is Activated");
     }
     else if(stMessage == "off"){
       Serial.println("off");
       digitalWrite(Relay_PIN, LOW);
-      client.publish("STATRELAY", "LED is OFF");
+      noTone(buzzer);
+      client.publish("STATRELAY", "Intrusion System is Deactivated");
     }
   }
 }
@@ -119,45 +117,55 @@ void loop() {
   }
   client.loop();
 
-  int motion = digitalRead(PIR_PIN);
-  int lightValue =analogRead(LDR_PIN);
+/****** Aquisition des données des capteurs ******/
+  int motion = digitalRead(PIR_PIN);  //capteur de mouvemnt
+  int lightValue =analogRead(LDR_PIN); //capteur de lumiére 
+  float t = dht.readTemperature(); // capteur de température 
+  
+
+
+/****** Pubblier les mesures des trois capteurs *******/
+  char tempString[8];
+  char lumString[8];     
+  dtostrf(t, 1, 2, tempString);
+  Serial.print(F("%  Temperature: "));
+  Serial.print(t);
+  Serial.print(F("°C "));
+  client.publish("myproject/temperature", tempString);
+
+  dtostrf(lightValue, 1, 2, lumString);
+  Serial.print("Luminosite: ");
+  Serial.println(lightValue);
+  client.publish("myproject/lumiere", lumString);
+  
   Serial.println(motion);
- 
   if (motion == HIGH){
     client.publish("myproject/motion", "Motion is detected");
   }
   else{
     client.publish("myproject/motion", "Motion is not detected");
   }
-
-  char tempString[8];
-  char lumString[8];     
-  float t = dht.readTemperature();
-  dtostrf(t, 1, 2, tempString);
-  Serial.print(F("%  Temperature: "));
-  Serial.print(t);
-  Serial.print(F("°C "));
-  client.publish("myproject/temperature", tempString);
-  Serial.print("Luminosite: ");
-  Serial.println(lightValue);
-  dtostrf(lightValue, 1, 2, lumString);
-  client.publish("myproject/lumiere", lumString);
   delay(5000);
+  
 
-if ((motion == HIGH)|| (t < TEMP_LOWER_THRESHOLD) || (lightValue > 1300) ){
+
+/****** Les Conditions d'activation du systéme ******/
+
+if ((motion == HIGH)|| (t < TEMP_LOWER_THRESHOLD) ){  // il y a un mouvement ou il y a un abaissement brusque de température 
     digitalWrite(Relay_PIN, HIGH);
     tone(buzzer,600);
-
-  } else 
+    client.publish("myproject/intrusion", "Alert!! Someone is is detected");
+}  
+else if ((motion == HIGH) && (lightValue > 1300)){  // il fait nuit et il ya un mouvement
+    digitalWrite(Relay_PIN, HIGH);
+    tone(buzzer,600);
+    client.publish("myproject/intrusion", "Alert!! Someone is is detected");
+}
+else 
   { digitalWrite(Relay_PIN, LOW);
     noTone(buzzer);
   }
  
-  // il fait nuit et il ya un mouvement 
-  /*if (lightValue > 1300 && motion == HIGH ) {
-    digitalWrite(Relay_PIN, HIGH);
-  } */
-  
-
+ 
   
 }
