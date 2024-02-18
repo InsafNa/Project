@@ -6,7 +6,7 @@ class MQTTTestApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Intrusion detection system")
-        self.root.geometry("400x300")
+        self.root.geometry("500x300")
 
         # Configuration MQTT
         self.broker_address = "broker.hivemq.com"
@@ -34,7 +34,7 @@ class MQTTTestApp:
         title_style = {'font': ('Arial', 18,'bold'), 'foreground': '#691D91', 'background': bg_color, 'anchor': 'w'}
 
         label_style = {'font': ('Arial', 12), 'foreground': '#723E64', 'background': bg_color, 'anchor': 'w'}
-        
+        label_style1 = {'font': ('Arial', 16, 'bold'), 'foreground': '#CE0058', 'background': bg_color}
          # Titre des données captées par les capteurs
         self.title_label = ttk.Label(self.root, text=" Captured data ", **title_style)
         self.title_label.pack(pady=pady_value, padx=padx_value)
@@ -48,8 +48,8 @@ class MQTTTestApp:
         self.temperature_label = ttk.Label(self.root, text="Temperature: ", **label_style)
         self.temperature_label.pack(pady=pady_value, padx=padx_value, anchor="w")
     
-        self.relay_state_label = ttk.Label(self.root, text="", **label_style)
-        self.relay_state_label.pack(pady=pady_value, padx=padx_value, anchor="w")
+        self.relay_state_label = ttk.Label(self.root, text="", **label_style1)
+        self.relay_state_label.pack(pady=pady_value, padx=padx_value)
         
        # self.relay_intrusion_label = ttk.Label(self.root, text="Alert:", **label_style)
         #self.relay_intrusion_label.pack(pady=pady_value, padx=padx_value, anchor="w")
@@ -60,7 +60,7 @@ class MQTTTestApp:
      
            
         self.activate_button = ttk.Button(self.root, text="Activate Relay", command=self.activate_relay, style="Custom.TButton")
-        self.activate_button.pack(side="left", padx=(100, padx_value), pady=pady_value)
+        self.activate_button.pack(side="left", padx=(150, padx_value), pady=pady_value)
 
         self.deactivate_button = ttk.Button(self.root, text="Disable Relay", command=self.deactivate_relay, style="Custom.TButton")
         self.deactivate_button.pack(side="left", padx=(0, padx_value), pady=pady_value)
@@ -96,7 +96,7 @@ class MQTTTestApp:
         elif topic == "STATRELAY":  
             self.relay_state_label.config(text=f"Relay status: {payload}")
         elif topic == "myproject/intrusion":  
-            self.relay_state_label.config(text=f"Alert: {payload}")
+            self.relay_state_label.config(text=f"{payload}")
         
         
          
