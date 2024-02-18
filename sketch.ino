@@ -99,13 +99,13 @@ void callback(char* topic, byte* message, unsigned int length) {
       Serial.println("on");
       digitalWrite(Relay_PIN, HIGH);
       tone(buzzer,600);
-      client.publish("STATRELAY", "Intrusion System is Activated");
+      client.publish("STATRELAY", "Intrusion system is Activated");
     }
     else if(stMessage == "off"){
       Serial.println("off");
       digitalWrite(Relay_PIN, LOW);
       noTone(buzzer);
-      client.publish("STATRELAY", "Intrusion System is Deactivated");
+      client.publish("STATRELAY", "Intrusion system is Deactivated");
     }
   }
 }
@@ -128,29 +128,28 @@ void loop() {
   char tempString[8];
   char lumString[8];     
   dtostrf(t, 1, 2, tempString);
-  Serial.print(F("%  Temperature: "));
-  Serial.print(t);
-  Serial.print(F("°C "));
   client.publish("myproject/temperature", tempString);
-
   dtostrf(lightValue, 1, 2, lumString);
-  Serial.print("Luminosite: ");
-  Serial.println(lightValue);
   client.publish("myproject/lumiere", lumString);
-  
-  Serial.println(motion);
   if (motion == HIGH){
     client.publish("myproject/motion", "Motion is detected");
   }
   else{
     client.publish("myproject/motion", "Motion is not detected");
   }
+
+/****** Affichage des mesures des capteurs *******/
+  Serial.println(motion);
+  Serial.print(F("%  Temperature: "));
+  Serial.print(t);
+  Serial.print(F("°C "));
+  Serial.print("Luminosite: ");
+  Serial.println(lightValue);
   delay(5000);
-  
 
 
 /****** Les Conditions d'activation du systéme ******/
-
+char ledState[8];
 if ((motion == HIGH)|| (t < TEMP_LOWER_THRESHOLD) ){  // il y a un mouvement ou il y a un abaissement brusque de température 
     digitalWrite(Relay_PIN, HIGH);
     tone(buzzer,600);
@@ -166,6 +165,9 @@ else
     noTone(buzzer);
   }
  
+   
  
+  
+
   
 }
