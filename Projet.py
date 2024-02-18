@@ -51,9 +51,6 @@ class MQTTTestApp:
         self.relay_state_label = ttk.Label(self.root, text="", **label_style1)
         self.relay_state_label.pack(pady=pady_value, padx=padx_value)
         
-       # self.relay_intrusion_label = ttk.Label(self.root, text="Alert:", **label_style)
-        #self.relay_intrusion_label.pack(pady=pady_value, padx=padx_value, anchor="w")
-        
          # Conteneur de cadre pour les boutons
         button_frame = ttk.Frame(self.root, padding=(0, pady_value))
         button_frame.pack()
@@ -64,9 +61,7 @@ class MQTTTestApp:
 
         self.deactivate_button = ttk.Button(self.root, text="Disable Relay", command=self.deactivate_relay, style="Custom.TButton")
         self.deactivate_button.pack(side="left", padx=(0, padx_value), pady=pady_value)
-        
 
-        
     def connect_to_mqtt(self):
         self.client = mqtt.Client()
         self.client.on_connect = self.on_connect
@@ -98,8 +93,7 @@ class MQTTTestApp:
         elif topic == "myproject/intrusion":  
             self.relay_state_label.config(text=f"{payload}")
         
-        
-         
+               
     def activate_relay(self):
         self.client.publish("topicactivaterelay", "on")
 
